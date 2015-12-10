@@ -1,0 +1,24 @@
+m_version: 1
+
+default-language: "kor"
+
+#(EN) ENGLISH
+eng: true
+eng-default-prefix: "[Server]"
+
+#(KO) KOREAN
+kor: true
+kor-default-prefix: "[아이템케이스]"
+kor-command: "아이템케이스"
+kor-command-add: "추가"
+kor-command-delete: "제거"
+kor-command-reset: "초기화"
+
+kor-command-description: "아이템케이스를 설치합니다."
+kor-command-help: "/아이템케이스 <추가|제거|초기화>"
+kor-add-help: "/아이템케이스 추가 <아이템번호>"
+
+kor-touch-block: "아이템케이스를 설치할 곳을 터치하세요"
+kor-create-success: "아이템케이스가 생성되었습니다."
+
+kor-item-not-number: "아이템번호는 숫자만 입력 가능합니다."
