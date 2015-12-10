@@ -19,14 +19,16 @@ use pocketmine\entity\Item;
 use pocketmine\math\Vector3;
 use pocketmine\block\Block;
 use pocketmine\level\Level;
+use pocketmine\event\block\BlockBreakEvent;
+use pocketmine\network\protocol\RemoveEntityPacket;
 
 class Itemcase extends PluginBase implements Listener
 {
 
 	private $m_version = 1, $db_version = 1, $plugin_version;
-	private $messages, $pluginDB;
+	private $messages, $itemcaseDB;
 	private $newversion = false;
-	private $createqueue = [];
+	private $createqueue = [], $deletequeue = [], $eid = [];
 	
 	public function onEnable()
 	{
@@ -42,7 +44,7 @@ class Itemcase extends PluginBase implements Listener
 			$this->newversion = true;
 		}
 		$this->messages = $this->Loadmessage();
-		$this->pluginDB = $this->Loadplugindata("pluginDB.json");
+		$this->itemcaseDB = $this->Loadplugindata("itemcaseDB.json");
 		$this->registerCommand($this->get("command"), "Itemcase", "itemcase.command.allow", $this->get("command-description"), $this->get("command-help"));
 		$this->getServer()->getPluginManager()->registerEvents($this, $this);
 		//$this->getServer ()->getScheduler ()->scheduleRepeatingTask ( new ExampleTask( $this ), 12000 );
@@ -57,7 +59,7 @@ class Itemcase extends PluginBase implements Listener
 	}
 	public function onDisable()
 	{
-		$this->save("pluginDB.json", $this->pluginDB);
+		$this->save("itemcaseDB.json", $this->itemcaseDB);
 	}
 	public function Loadmessage()
 	{
@@ -149,14 +151,22 @@ class Itemcase extends PluginBase implements Listener
 						$this->alert($sender, $this->get("item-not-number"));
 						return true;
 					}
-					$this->message($sender, $this->get("touch-block"));
+					$this->message($sender, $this->get("touch-createblock"));
 					$this->createqueue[$sender->getName()] = $args[1];
 					break;
 				case $this->get ("command-delete") :
-					
+					$this->deletequeue[$sender->getName()] = true;
+					$this->message($sender, $this->get("touch-deleteblock"));
+					break;
+				case $this->get("command-reset") :
+					foreach ($this->itemcaseDB as $pos=>$item){
+						$this->DeleteItemCase($this->StringToPos($pos));
+					}
+					unset($this->itemcaseDB);
+					$this->message($sender, $this->get("reset-success"));
 					break;
 				default :
-					// TODO - 잘못된 명령어 입력시 도움말 표시
+					$this->alert($sender, $this->get("command-help"));
 					break;
 			}
 		}
@@ -172,13 +182,35 @@ class Itemcase extends PluginBase implements Listener
 			unset($this->createqueue[$player]);
 			$player = $event->getPlayer();
 			$this->message($player, $this->get("create-success"));
-	
+		} else if(isset($this->deletequeue[$player])){
+			$pos = new Vector3($event->getBlock()->getX(), $event->getBlock()->getY(), $event->getBlock()->getZ());
+			if($this->DeleteItemCase($pos)){
+				$player = $event->getPlayer();
+				$this->message($player, $this->get("delete-success"));
+				unset($this->deletequeue[$player->getName()]);
+			}
 		}
+		return true;
 	}
+	/**
+	 * 아이템케이스를 생성합니다.
+	 * 
+	 * @param \pocketmine\item\Item $item
+	 * @param Vector3 $pos
+	 * @param Level $level
+	 * 
+	 */
 	public function AddItemCase(\pocketmine\item\Item $item, Vector3 $pos, Level $level)
+	{
+		$this->SendItemPacket($item, $pos);
+		$level->setBlock($pos, Block::get(\pocketmine\item\Item::GLASS));
+		$this->itemcaseDB[$this->PosToString($pos)] = $item->getId();
+	}
+	public function SendItemPacket(\pocketmine\item\Item $item, Vector3 $pos)
 	{
 		$packet = new AddItemEntityPacket();
 		$packet->eid = Entity::$entityCount++;
+		$this->eid[$this->PosToString($pos)] = $packet->eid;
 		$packet->item = $item;
 		$packet->x = $pos->getX()+0.5;
 		$packet->y = $pos->getY();
@@ -187,6 +219,73 @@ class Itemcase extends PluginBase implements Listener
 		foreach ($players as $player){
 			$player->dataPacket($packet);
 		}
-		$level->setBlock($pos, Block::get(\pocketmine\item\Item::GLASS));
+	}
+	/**
+	 * 아이템 케이스를 제거합니다. 성공적으로 제거하면 true 를 반환하고 해당 좌표에 아이템케이스가 없으면 false를 반환합나다.
+	 * 
+	 * @param Vector3 $pos
+	 * @return boolean
+	 * 
+	 */
+	public function DeleteItemCase(Vector3 $pos)
+	{
+		if(!isset($this->itemcaseDB[$this->PosToString($pos)])){
+			return false;
+		} else {
+			unset($this->itemcaseDB[$this->PosToString($pos)]);
+			$packet = new RemoveEntityPacket();
+			$packet->eid = $this->eid[$this->PosToString($pos)];
+			foreach ($this->getServer()->getOnlinePlayers() as $player){
+				$player->dataPacket($packet);
+			}
+			return true;
+		}
+	}
+	public function onBreak(BlockBreakEvent $event)
+	{
+		$block = $event->getBlock();
+		$pos = new Vector3($block->getX(), $block->getY(), $block->getZ());
+		if(isset($this->itemcaseDB[$this->PosToString($pos)])){
+			$event->setCancelled();
+		}
+	}
+	public function onJoin(PlayerJoinEvent $event)
+	{
+		if(!isset($this->itemcaseDB)){
+			return true;
+		}
+		$player = $event->getPlayer();
+		foreach ($this->itemcaseDB as $pos=>$item){
+			$pos = $this->StringToPos($pos);
+			$packet = new AddItemEntityPacket();
+			$packet->eid = Entity::$entityCount++;
+			$packet->item = \pocketmine\item\Item::get($item);
+			$packet->x = $pos->getX()+0.5;
+			$packet->y = $pos->getY();
+			$packet->z = $pos->getZ()+0.5;
+			$player->dataPacket($packet);
+		}
+	}
+	/**
+	 * 
+	 * @param Vector3 $pos
+	 * 
+	 * @return x.y.z
+	 * 
+	 */
+	public function PosToString(Vector3 $pos)
+	{
+		return "{$pos->getX()}.{$pos->getY()}.{$pos->getZ()}";
+	}
+	/**
+	 * 
+	 * @param String $string
+	 * 
+	 * @return Vector3
+	 */
+	public function StringToPos($string)
+	{
+		$pos = explode(".", $string);
+		return new Vector3($pos[0], $pos[1], $pos[2]);
 	}
 }
