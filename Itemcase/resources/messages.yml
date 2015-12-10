@@ -18,7 +18,10 @@ kor-command-description: "아이템케이스를 설치합니다."
 kor-command-help: "/아이템케이스 <추가|제거|초기화>"
 kor-add-help: "/아이템케이스 추가 <아이템번호>"
 
-kor-touch-block: "아이템케이스를 설치할 곳을 터치하세요"
+kor-touch-createblock: "아이템케이스를 설치할 곳을 터치하세요."
+kor-touch-deleteblock: "삭제할 아이템케이스를 터치하세요."
 kor-create-success: "아이템케이스가 생성되었습니다."
+kor-delete-success: "아이템케이스를 삭제했습니다."
+kor-reset-success: "모든 아이템케이스를 삭제했습니다."
 
 kor-item-not-number: "아이템번호는 숫자만 입력 가능합니다."
