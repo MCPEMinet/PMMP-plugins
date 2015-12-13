@@ -1,0 +1,13 @@
+name: Stock
+main: Stock\Stock
+version: "1.0"
+author: maru
+api:
+- 1.12.0
+- 1.13.0
+- 2.0.0
+
+permissions:
+ stock.command.allow:
+  descript: "stock permission"
+  default: true
