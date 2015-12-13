@@ -1,0 +1,46 @@
+m_version: 1
+
+default-language: "kor"
+
+#(EN) ENGLISH
+eng: true
+eng-default-prefix: "[Server]"
+
+#(KO) KOREAN
+kor: true
+kor-default-prefix: "[주식]"
+
+kor-command-stock: "주식"
+kor-command-buy: "구매"
+kor-command-sell: "판매"
+kor-command-info: "정보"
+kor-command-create: "생성"
+kor-command-remove: "제거"
+
+kor-command-description: "주식을 구매/판매 합니다."
+kor-command-help: "/주식 <구매|판매|정보>"
+kor-command-ophelp: "/주식 <구매|판매|정보|생성|제거>"
+kor-buy-help: "/주식 구매 <수량>"
+kor-sell-help: "/주식 판매 <수량>"
+
+kor-set-stock-price: "주식의 가격을 %money%원으로 설정했습니다."
+kor-buy-success: "주식 %num%개를 %money%원에 구입하셨습니다."
+kor-sell-success: "주식 %num%개를 %money%원에 판매하셨습니다."
+kor-stock-info: "당신의 보유 주식은 %num%개이고 총합 %price%원 입니다."
+kor-touch-create: "주식케이스를 생성할 곳을 터치해주세요."
+kor-stockcase-nametag: "터치시 주식 정보 확인"
+kor-touch-remove: "제거할 주식케이스를 터치해주세요."
+kor-success-create: "주식케이스를 생성했습니다."
+kor-success-remove: "주식케이스를 제거했습니다."
+kor-increase-price: "주식의 가격이 %before%원에서 %money%원이 올라 %after%원이 되었습니다."
+kor-decrease-price: "주식의 가격이 %before%원에서 %money%원이 내려 %after%원이 되었습니다."
+kor-stock-information-1: "변경전 주식 가격: %money%원"
+kor-stock-information-2: "현재 주식 가격: %money%원"
+kor-stock-bankruptcy: "주식의 가격이 0원 미만으로 떨어졌습니다. 모든 주식이 사라집니다."
+
+kor-cant-find-economyapi: "EconomyAPI 플러그인을 찾을 수 없습니다. EconomyAPI 플러그인을 적용해주세요!"
+kor-not-enough-money: "돈이 부족합니다."
+kor-must-numeric: "수량은 정수만 입력 가능합니다."
+kor-must-bigger-than-0: "수량은 0보다 커야합니다."
+kor-not-have-stock: "보유한 주식이 부족합니다."
+kor-not-have-permission: "명령어를 실행할 권한이 없습니다."
