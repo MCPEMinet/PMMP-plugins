@@ -4,3 +4,11 @@ price-change-minute: 10
 #주식 최소/최대 가격
 min-price: 10000
 max-price: 100000
+
+#주식 상승/하락 가격
+min-rise-price: 1000
+max-rise-price: 3000
+
+#주식 급등/급락 가격
+min-jumprise-price: 10000
+max-jumprise-price: 30000
