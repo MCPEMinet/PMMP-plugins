@@ -19,7 +19,6 @@ use pocketmine\entity\Entity;
 use pocketmine\item\Item;
 use pocketmine\level\Level;
 use pocketmine\block\Block;
-use pocketmine\network\protocol\AddEntityPacket;
 use pocketmine\network\protocol\RemoveEntityPacket;
 use pocketmine\Player;
 use Stock\task\StockpriceChangeTask;
@@ -49,13 +48,13 @@ class Stock extends PluginBase implements Listener
 		$this->getServer()->getPluginManager()->registerEvents($this, $this);
 		$this->getServer ()->getScheduler ()->scheduleRepeatingTask ( new StockpriceChangeTask( $this, $this ), $this->config["price-change-minute"] * 20 * 60 );
 	}
-	public function registerCommand($name, $fallback, $permission, $description = "", $usage = "") {
+	public function registerCommand($name, $riseback, $permission, $description = "", $usage = "") {
 		$commandMap = $this->getServer ()->getCommandMap ();
 		$command = new PluginCommand ( $name, $this );
 		$command->setDescription ( $description );
 		$command->setPermission ( $permission );
 		$command->setUsage($usage);
-		$commandMap->register ( $fallback, $command );
+		$commandMap->register ( $riseback, $command );
 	}
 	public function Loadstockprice()
 	{
@@ -68,14 +67,15 @@ class Stock extends PluginBase implements Listener
 	public function onDisable()
 	{
 		$this->save("stockDB.json", $this->stockDB);
-		$config = new Config($this->getDataFolder()."config.yml", Config::YAML);
-		$config->setAll($this->config);
-		$config->save();
 	}
 	public function LoadConfig()
 	{
 		$this->saveResource("config.yml");
 		$this->config = (new Config($this->getDataFolder()."config.yml", Config::YAML))->getAll();
+		if(!isset($this->config["min-rise-price"])){
+			$this->saveResource("config.yml", true);
+			$this->config = (new Config($this->getDataFolder()."config.yml", Config::YAML))->getAll();
+		}
 	}
 	public function Loadmessage()
 	{
@@ -329,18 +329,18 @@ class Stock extends PluginBase implements Listener
 		if($this->getStockPrice() < $min){
 			if(mt_rand(1, 100) <= 60){
 				if(mt_rand(1, 100) <= 30){
-					$changemoney = mt_rand((int)($max / 10), (int)($max / 10 * 3));
+					$changemoney = mt_rand($this->config["min-jumprise-price"], $this->config["max-jumprise-prise"]);
 				} else {
-					$changemoney = mt_rand((int)($min / 10), (int)($min / 10 * 3));
+					$changemoney = mt_rand($this->config["min-rise-price"], $this->config["max-rise-price"]);
 				}
 				$this->stockDB["stock"]["beforeprice"] = $this->stockDB["stock"]["price"];
 				$this->stockDB["stock"]["price"] += $changemoney;
 				$this->getServer()->broadcastMessage(TextFormat::BLUE.$this->get("default-prefix")." ".str_replace("%before%", $this->stockDB["stock"]["beforeprice"], str_replace("%after%", $this->stockDB["stock"]["price"], str_replace("%money%", $changemoney, $this->get("increase-price")))));
 			} else {
 				if (mt_rand(1, 100) <= 20){
-					$changemoney = mt_rand((int)($max / 10), (int)($max / 10 * 3));
+					$changemoney = mt_rand($this->config["min-jumprise-price"], $this->config["max-jumprise-price"]);
 				} else {
-					$changemoney = mt_rand((int)($min / 10), (int)($min / 10 * 3));
+					$changemoney = mt_rand($this->config["min-rise-price"], $this->config["max-rise-price"]);
 				}
 				$this->stockDB["stock"]["beforeprice"] = $this->stockDB["stock"]["price"];
 				$this->stockDB["stock"]["price"] -= $changemoney;
@@ -349,18 +349,18 @@ class Stock extends PluginBase implements Listener
 		} else if ($this->getStockPrice() > $max) {
 			if(mt_rand(1, 100) <= 40){
 				if(mt_rand(1, 100) <= 20){
-					$changemoney = mt_rand((int)($max / 10), (int)($max / 10 * 3));
+					$changemoney = mt_rand($this->config["min-jumprise-price"], $this->config["max-jumprise-price"]);
 				} else {
-					$changemoney = mt_rand((int)($min / 10), (int)($min / 10 * 3));
+					$changemoney = mt_rand($this->config["min-rise-price"], $this->config["max-rise-price"]);
 				}
 				$this->stockDB["stock"]["beforeprice"] = $this->stockDB["stock"]["price"];
 				$this->stockDB["stock"]["price"] += $changemoney;
 				$this->getServer()->broadcastMessage(TextFormat::BLUE.$this->get("default-prefix")." ".str_replace("%before%", $this->stockDB["stock"]["beforeprice"], str_replace("%after%", $this->stockDB["stock"]["price"], str_replace("%money%", $changemoney, $this->get("increase-price")))));
 			} else {
 				if (mt_rand(1, 100) <= 30){
-					$changemoney = mt_rand((int)($max / 10), (int)($max / 10 * 3));
+					$changemoney = mt_rand($this->config["min-jumprise-price"], $this->config["max-jumprise-price"]);
 				} else {
-					$changemoney = mt_rand((int)($min / 10), (int)($min / 10 * 3));
+					$changemoney = mt_rand($this->config["min-rise-price"], $this->config["max-rise-price"]);
 				}
 				$this->stockDB["stock"]["beforeprice"] = $this->stockDB["stock"]["price"];
 				$this->stockDB["stock"]["price"] -= $changemoney;
@@ -371,9 +371,9 @@ class Stock extends PluginBase implements Listener
 			if($probability){
 				$probability = mt_rand(1, 100);
 				if($probability <= 20) {
-					$changemoney = mt_rand((int)($max / 10), (int)($max / 10 * 3));
+					$changemoney = mt_rand($this->config["min-jumprise-price"], $this->config["max-jumprise-price"]);
 				} else {
-					$changemoney = mt_rand((int)($min / 10), (int)($min / 10 * 3));
+					$changemoney = mt_rand($this->config["min-rise-price"], $this->config["max-rise-price"]);
 				}
 				$this->stockDB["stock"]["beforeprice"] = $this->stockDB["stock"]["price"];
 				$this->stockDB["stock"]["price"] += $changemoney;
@@ -381,9 +381,9 @@ class Stock extends PluginBase implements Listener
 			} else {
 				$probability = mt_rand(1, 100);
 				if($probability <= 20){
-					$changemoney = mt_rand((int)($max / 10), (int)($max / 10 * 3));
+					$changemoney = mt_rand($this->config["min-jumprise-price"], $this->config["max-jumprise-price"]);
 				} else {
-					$changemoney =  mt_rand((int)($min / 10), (int)($max / 10 * 3));
+					$changemoney =  mt_rand($this->config["min-rise-price"], $this->config["max-rise-price"]);
 				}
 				$this->stockDB["stock"]["beforeprice"] = $this->stockDB["stock"]["price"];
 				$this->stockDB["stock"]["price"] -= $changemoney;
