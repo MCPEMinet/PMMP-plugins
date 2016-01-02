@@ -1,0 +1,37 @@
+m_version: 2
+
+default-language: "kor"
+
+#(EN) ENGLISH
+eng: true
+eng-default-prefix: "[Server]"
+
+#(KO) KOREAN
+kor: true
+kor-default-prefix: "[기기밴]"
+kor-command-uuidban: "기기밴"
+kor-command-add: "추가"
+kor-command-delete: "제거"
+kor-command-list: "목록"
+kor-command-reset: "초기화"
+kor-command-find: "찾기"
+kor-command-reason: "이유"
+
+kor-uuidban-description: "uuid를 이용하여 밴을 합니다."
+kor-uuidban-help: "/기기밴 <추가|제거|초기화|목록|찾기|이유>"
+kor-add-help: "/기기밴 추가 <플레이어> [이유]"
+kor-delete-help: "/기기밴 제거 <플레이어>"
+kor-list-help: "/기기밴 목록"
+kor-find-help: "/기기밴 찾기 <플레이어>"
+kor-reason-help: "/기기밴 이유 <플레이어>"
+
+kor-you-are-banned: "당신은 밴입니다."
+kor-ban-success: "해당 유저를 밴했습니다."
+kor-unban-success: "해당 유저의 밴을 해제했습니다."
+kor-unban-all: "모든 유저의 밴을 해제했습니다."
+kor-show-reason: "%player%님은 [%reason%] 의 이유로 %op%님에게 밴당했습니다." 
+
+kor-cant-find-uuid: "해당 플레이어의 기기번호를 찾을 수 없습니다."
+kor-not-banned: "해당 유저는 밴되어있지 않습니다."
+kor-cant-find-list: "밴 목록이 없습니다."
+kor-cant-find-reason: "사유 미입력"
